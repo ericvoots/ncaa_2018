@@ -56,7 +56,21 @@ details4_df = details4_df.drop(['Wins', 'Losses', 'Seed1', 'Seed2'], axis=1)
 del details3_df, seed_hist_df
 gc.collect()
 
-print(details4_df.head(25))
+#get conf_rankings
+#get winning teams conference  rank
+details5_df = pd.merge(details4_df, conf_rank_df, how='left', left_on=['WConf', 'Season'], right_on=['conference', 'year'])
+details5_df = details5_df.drop(['W', 'L', 'PCT', 'Non_Conference_RPI', 'Overall_RPI', 'conference', 'year'], axis=1)
+details5_df = details5_df.rename(columns={'Rank': 'WConf_Rank', 'fullconference': 'Wfull_conf'})
 
+#get lossing teams conference rank
+details5_df = pd.merge(details5_df, conf_rank_df, how='left', left_on=['LConf', 'Season'], right_on=['conference', 'year'])
+details5_df = details5_df.drop(['W', 'L', 'PCT', 'Non_Conference_RPI', 'Overall_RPI', 'conference', 'year'], axis=1)
+details5_df = details5_df.rename(columns={'Rank': 'LConf_Rank', 'fullconference': 'Lfull_conf'})
+
+del details4_df, conf_rank_df
+gc.collect()
+
+#save data
+details5_df.to_csv('input\\training_data_all')
 
 
