@@ -70,7 +70,27 @@ details5_df = details5_df.rename(columns={'Rank': 'LConf_Rank', 'fullconference'
 del details4_df, conf_rank_df
 gc.collect()
 
+#save intermediate step before creating set for input and output
+#details5_df.to_csv('input\\details_conf_hist.csv')
+
+
+print(details5_df.columns)
+#match up losing teams to create 0 Win values
+#thx to https://www.kaggle.com/juliaelliott/basic-starter-kernel-ncaa-men-s-dataset for inspiration on next part
+df_wins = pd.DataFrame()
+df_wins['WConf'] = details5_df['WConf']
+df_wins['Win'] = 1
+
+df_loss = pd.DataFrame()
+df_loss['LConf'] = details5_df['LConf']
+df_loss['Win'] = 0
+
+df_win = details5_df.rename(columns={'WTeamID': 'TeamID', 'LTeamID:': 'Opp_ID'})
+df_loss = details5_df.rename(columns={'LTeamID': 'TeamID', 'WTeamID': 'Opp_ID'})
+
+
+
 #save data
-details5_df.to_csv('input\\training_data_all')
+#win_df.to_csv('input\\training_data.csv')
 
 
