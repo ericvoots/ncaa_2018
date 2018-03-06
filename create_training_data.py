@@ -73,23 +73,24 @@ gc.collect()
 #save intermediate step before creating set for input and output
 #details5_df.to_csv('input\\details_conf_hist.csv')
 
+details5_df_temp = details5_df.copy()
 
-print(details5_df.columns)
 #match up losing teams to create 0 Win values
 #thx to https://www.kaggle.com/juliaelliott/basic-starter-kernel-ncaa-men-s-dataset for inspiration on next part
-df_wins = pd.DataFrame()
-df_wins['WConf'] = details5_df['WConf']
-df_wins['Win'] = 1
 
-df_loss = pd.DataFrame()
-df_loss['LConf'] = details5_df['LConf']
-df_loss['Win'] = 0
+#rename W columns first then L columns
+df_win = details5_df.rename(columns={'WTeamID': 'TeamID', 'WScore': 'Score', 'WLoc': 'Loc', 'WFGM': 'FGM', 'WFGA': 'FGA',\
+                                     'WFGM3': 'FGM3', 'WFTM': 'FTM', 'WFTA': 'FTA', 'WOR': 'OR', 'WDR': 'DR', 'WAst':'Ast',\
+                                     'WTO': 'TO', 'WFGA3': 'FGA3', 'WStl': 'Stl', 'WBlk': 'Blk', 'WPF': 'PF',\
+                                     'WSeed': 'Seed', 'WConf': 'Conf'})
 
-df_win = details5_df.rename(columns={'WTeamID': 'TeamID', 'LTeamID:': 'Opp_ID'})
-df_loss = details5_df.rename(columns={'LTeamID': 'TeamID', 'WTeamID': 'Opp_ID'})
+df_win = df_win.rename(columns={'LTeamID': 'Opp_ID', 'LScore': 'Opp_Score', 'LFGM': 'Opp_FGM'\
+                                    ,'LFGA':'Opp_LFGA'})
+#df_loss = details5_df_temp.rename(columns={'LTeamID': 'TeamID', 'WTeamID': 'Opp_ID'})
 
-
-
+print(df_win.columns)
+#print(df_win['Opp_ID'])
+#print(df_loss.head(5))
 #save data
 #win_df.to_csv('input\\training_data.csv')
 
