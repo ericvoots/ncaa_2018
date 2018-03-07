@@ -5,6 +5,8 @@ import pandas as pd
 import numpy as np
 import gc
 
+#
+
 t_seeds_df = pd.read_csv('input\\datafiles\\NCAATourneySeeds.csv')
 
 details_df = pd.read_csv('input\\datafiles\\NCAATourneyDetailedResults.csv')
@@ -117,8 +119,6 @@ total_df = pd.concat(frames)
 total_df.reset_index()
 
 #next is variable creation
-
-
 
 #save data
 total_df.to_csv('input\\training_data.csv')
