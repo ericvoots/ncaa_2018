@@ -52,6 +52,10 @@ gc.collect()
 #get seed matching up information - play in games with two 16s will be a 0% due to data but its 16 seed so...
 details4_df = pd.merge(details3_df, seed_hist_df, how='left', left_on=['WSeed', 'LSeed'], right_on=['Seed1', 'Seed2'])
 details4_df = details4_df.drop(['Wins', 'Losses', 'Seed1', 'Seed2'], axis=1)
+details4_df = details4_df.rename(columns={'Win%': 'seed_hist_pct'})
+details4_df = pd.merge(details4_df, seed_hist_df, how='left', left_on=['LSeed', 'WSeed'], right_on=['Seed1', 'Seed2'])
+details4_df = details4_df.drop(['Wins', 'Losses', 'Seed1', 'Seed2'], axis=1)
+details4_df = details4_df.rename(columns={'Win%': 'Opp_seed_hist_pct'})
 
 del details3_df, seed_hist_df
 gc.collect()
@@ -73,25 +77,50 @@ gc.collect()
 #save intermediate step before creating set for input and output
 #details5_df.to_csv('input\\details_conf_hist.csv')
 
+details5_df = details5_df.drop(['WLoc'],axis=1)
 details5_df_temp = details5_df.copy()
 
 #match up losing teams to create 0 Win values
 #thx to https://www.kaggle.com/juliaelliott/basic-starter-kernel-ncaa-men-s-dataset for inspiration on next part
 
 #rename W columns first then L columns
-df_win = details5_df.rename(columns={'WTeamID': 'TeamID', 'WScore': 'Score', 'WLoc': 'Loc', 'WFGM': 'FGM', 'WFGA': 'FGA',\
+df_win = details5_df.rename(columns={'WTeamID': 'TeamID', 'WScore': 'Score', 'WFGM': 'FGM', 'WFGA': 'FGA',\
                                      'WFGM3': 'FGM3', 'WFTM': 'FTM', 'WFTA': 'FTA', 'WOR': 'OR', 'WDR': 'DR', 'WAst':'Ast',\
                                      'WTO': 'TO', 'WFGA3': 'FGA3', 'WStl': 'Stl', 'WBlk': 'Blk', 'WPF': 'PF',\
-                                     'WSeed': 'Seed', 'WConf': 'Conf'})
+                                     'WSeed': 'Seed', 'WConf': 'Conf', 'Wfull_conf': 'full_conf', 'WConf_Rank': 'Conf_Rank'})
 
-df_win = df_win.rename(columns={'LTeamID': 'Opp_ID', 'LScore': 'Opp_Score', 'LFGM': 'Opp_FGM'\
-                                    ,'LFGA':'Opp_LFGA'})
-#df_loss = details5_df_temp.rename(columns={'LTeamID': 'TeamID', 'WTeamID': 'Opp_ID'})
+df_win = df_win.rename(columns={'LTeamID': 'Opp_ID', 'LScore': 'Opp_Score', 'LFGM': 'Opp_FGM', 'LFGA': 'Opp_FGA',\
+                                'LFGM3': 'Opp_FGM3', 'LFGA3': 'Opp_FGA3', 'LFTM': 'Opp_FTM', 'LFTA': 'Opp_FTA', 'LOR': \
+                                'Opp_OR', 'LDR': 'Opp_DR', 'LAst': 'Opp_Ast', 'LTO': 'Opp_TO', 'LStl': 'Opp_Stl',\
+                                'LBlk': 'Opp_Blk', 'LPF': 'Opp_PF', 'LSeed': 'Opp_Seed', 'LConf': 'Opp_Conf',\
+                                'Lfull_conf': 'Opp_full_conf', 'LConf_Rank': 'Opp_Conf_Rank'})
 
-print(df_win.columns)
-#print(df_win['Opp_ID'])
-#print(df_loss.head(5))
+df_win['Result'] = 1
+
+df_loss = details5_df_temp.rename(columns={'LTeamID': 'TeamID', 'LScore': 'Score', 'LFGM': 'FGM', 'LFGA': 'FGA',\
+                                     'LFGM3': 'FGM3', 'LFTM': 'FTM', 'LFTA': 'FTA', 'LOR': 'OR', 'LDR': 'DR', 'LAst':'Ast',\
+                                     'LTO': 'TO', 'LFGA3': 'FGA3', 'LStl': 'Stl', 'LBlk': 'Blk', 'LPF': 'PF',\
+                                     'LSeed': 'Seed', 'LConf': 'Conf', 'Lfull_conf': 'full_conf', 'LConf_Rank': 'Conf_Rank'})
+
+df_loss = df_loss.rename(columns={'WTeamID': 'Opp_ID', 'WScore': 'Opp_Score', 'WFGM': 'Opp_FGM', 'WFGA': 'Opp_FGA',\
+                                'WFGM3': 'Opp_FGM3', 'WFGA3': 'Opp_FGA3', 'WFTM': 'Opp_FTM', 'WFTA': 'Opp_FTA', 'WOR': \
+                                'Opp_OR', 'WDR': 'Opp_DR', 'WAst': 'Opp_Ast', 'WTO': 'Opp_TO', 'WStl': 'Opp_Stl',\
+                                'WBlk': 'Opp_Blk', 'WPF': 'Opp_PF', 'WSeed': 'Opp_Seed', 'WConf': 'Opp_Conf',\
+                                'Wfull_conf': 'Opp_full_conf', 'WConf_Rank': 'Opp_Conf_Rank'})
+
+df_loss['Result'] = 0
+
+frames = [df_win, df_loss]
+del df_win, df_loss
+gc.collect()
+total_df = pd.concat(frames)
+total_df.reset_index()
+
+#next is variable creation
+
+
+
 #save data
-#win_df.to_csv('input\\training_data.csv')
+total_df.to_csv('input\\training_data.csv')
 
 
