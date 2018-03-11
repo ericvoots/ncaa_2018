@@ -12,6 +12,11 @@ from sklearn.utils import shuffle
 
 from sklearn.ensemble import RandomForestClassifier
 
+from keras.models import Sequential
+from keras.layers import Dense
+from sklearn.model_selection import StratifiedKFold
+
+
 train_all_df = pd.read_csv('input\\training_data.csv')
 train_all_df = shuffle(train_all_df)
 
@@ -76,7 +81,7 @@ log_prob_df = clf_log.predict_proba(x_os_df)[:, 1]
 log_prob_df = pd.DataFrame(log_prob_df, columns=['probability'])
 log_prob_df.to_csv('submissions\\log_probabilities.csv')
 
-rclf = RandomForestClassifier(n_estimators=25,min_samples_split=60,min_samples_leaf=30)
+rclf = RandomForestClassifier(n_estimators=25, min_samples_split=60, min_samples_leaf=30)
 rclf_fit = rclf.fit(train_x_df, train_y_df)
 rclf_score = rclf.score(train_x_df, train_y_df)
 rclf_predict = rclf.predict_proba(train_x_df)[:,1]
@@ -84,4 +89,20 @@ rclf_predict_df = pd.DataFrame(rclf_predict, columns=['rf_proba'])
 
 print(rclf_predict_df)
 print(rclf_score)
+
+#tensorflow
+
+model = Sequential()
+model.add(Dense(120, input_dim=train_x_df.shape[1], activation='relu'))
+model.add(Dense(80, activation='relu'))
+model.add(Dense(8, activation='sigmoid'))
+model.add(Dense(1, activation='sigmoid'))
+# Compile model
+model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+# Fit the model
+model.fit(train_x_df.values, train_y_df.values, epochs=150, batch_size=10)
+# evaluate the model
+scores = model.evaluate(train_x_df.values, train_y_df.values)
+print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
+
 

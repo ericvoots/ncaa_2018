@@ -120,6 +120,12 @@ total_df.reset_index()
 
 #next is variable creation
 
+total_df['seed_diff'] = total_df['Seed'] - total_df['Opp_Seed']
+total_df['conf_diff'] = total_df['Conf_Rank'] - total_df['Opp_Conf_Rank']
+total_df['asst_to'] = total_df['Ast'] / total_df['TO']
+total_df['opp_asst_to'] = total_df['Opp_Ast'] / total_df['Opp_TO']
+
+
 #save data
 total_df.to_csv('input\\training_data.csv')
 
