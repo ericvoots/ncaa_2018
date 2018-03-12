@@ -7,18 +7,19 @@ import pandas as pd
 import numpy as np
 import gc
 
-from sklearn.linear_model import LogisticRegressionCV
-from sklearn.utils import shuffle
+from sklearn.linear_model import LogisticRegressionCV, Ridge
 
 from sklearn.ensemble import RandomForestClassifier
-
-from keras.models import Sequential
-from keras.layers import Dense
-from sklearn.model_selection import StratifiedKFold
+from xgboost import XGBClassifier
+#from keras.models import Sequential
+#from keras.layers import Dense
+from sklearn.model_selection import StratifiedKFold, GridSearchCV
+from sklearn.model_selection import cross_val_score
+from sklearn.preprocessing import MinMaxScaler
+import xgboost
 
 
 train_all_df = pd.read_csv('input\\training_data.csv')
-train_all_df = shuffle(train_all_df)
 
 os_df = train_all_df.loc[train_all_df['Season'] > 2016]
 train_all_df = train_all_df.loc[train_all_df['Season'] < 2017]
@@ -90,19 +91,45 @@ rclf_predict_df = pd.DataFrame(rclf_predict, columns=['rf_proba'])
 print(rclf_predict_df)
 print(rclf_score)
 
-#tensorflow
+#tensorflow - shows signs of overfitting - try norm - still 0 or 1 similar to log
+'''
+scaler = MinMaxScaler()
+train_x_df_norm = scaler.fit_transform(train_x_df)
+
 
 model = Sequential()
-model.add(Dense(120, input_dim=train_x_df.shape[1], activation='relu'))
+model.add(Dense(120, input_dim=train_x_df_norm.shape[1], activation='relu'))
 model.add(Dense(80, activation='relu'))
+model.add(Dense(40, activation='hard_sigmoid'))
 model.add(Dense(8, activation='sigmoid'))
 model.add(Dense(1, activation='sigmoid'))
 # Compile model
 model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 # Fit the model
-model.fit(train_x_df.values, train_y_df.values, epochs=150, batch_size=10)
+model.fit(train_x_df_norm, train_y_df, epochs=150, batch_size=25)
 # evaluate the model
-scores = model.evaluate(train_x_df.values, train_y_df.values)
+scores = model.evaluate(train_x_df_norm, train_y_df.values)
 print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
 
+tf_pred_df = model.predict(train_x_df_norm)
+tf_pred_df = pd.DataFrame(tf_pred_df)
+tf_pred_df.to_csv('submissions\\tf_pred_train.csv')
+'''
+#xgboost and stratified kfold
+
+model_xgb = XGBClassifier( learning_rate =0.1, n_estimators=140, max_depth=3,
+ min_child_weight=30, gamma=0, subsample=0.8, colsample_bytree=0.8,
+ objective= 'binary:logistic', nthread=4, scale_pos_weight=1, seed=27)
+
+model_xgb.fit(train_x_df, train_y_df)
+
+kfold = StratifiedKFold(n_splits=10, random_state=7)
+results = cross_val_score(model_xgb, train_x_df, train_y_df, cv=kfold)
+print("Accuracy: %.2f%% (%.2f%%)" % (results.mean()*100, results.std()*100))
+
+
+#lightgbm
+
+
+#catboost
 
