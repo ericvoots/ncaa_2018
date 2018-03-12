@@ -6,9 +6,10 @@ from sklearn import model_selection
 import pandas as pd
 import numpy as np
 import gc
-
+from sklearn.cross_validation import train_test_split
 from sklearn.linear_model import LogisticRegressionCV, Ridge
-
+from lightgbm import LGBMClassifier
+import lightgbm as lgb
 from sklearn.ensemble import RandomForestClassifier
 from xgboost import XGBClassifier
 #from keras.models import Sequential
@@ -85,8 +86,8 @@ log_prob_df.to_csv('submissions\\log_probabilities.csv')
 rclf = RandomForestClassifier(n_estimators=25, min_samples_split=60, min_samples_leaf=30)
 rclf_fit = rclf.fit(train_x_df, train_y_df)
 rclf_score = rclf.score(train_x_df, train_y_df)
-rclf_predict = rclf.predict_proba(train_x_df)[:,1]
-rclf_predict_df = pd.DataFrame(rclf_predict, columns=['rf_proba'])
+rclf_predict_df = rclf.predict_proba(train_x_df)[:,1]
+rclf_predict_df = pd.DataFrame(rclf_predict_df, columns=['rf_proba'])
 
 print(rclf_predict_df)
 print(rclf_score)
@@ -115,10 +116,10 @@ tf_pred_df = model.predict(train_x_df_norm)
 tf_pred_df = pd.DataFrame(tf_pred_df)
 tf_pred_df.to_csv('submissions\\tf_pred_train.csv')
 '''
-#xgboost and stratified kfold
+#xgboost and stratified kfold, best results around 5 depth, 50 weight
 
-model_xgb = XGBClassifier( learning_rate =0.1, n_estimators=140, max_depth=3,
- min_child_weight=30, gamma=0, subsample=0.8, colsample_bytree=0.8,
+model_xgb = XGBClassifier( learning_rate =0.1, n_estimators=140, max_depth=5,
+ min_child_weight=50, gamma=0, subsample=0.8, colsample_bytree=0.8,
  objective= 'binary:logistic', nthread=4, scale_pos_weight=1, seed=27)
 
 model_xgb.fit(train_x_df, train_y_df)
@@ -127,9 +128,54 @@ kfold = StratifiedKFold(n_splits=10, random_state=7)
 results = cross_val_score(model_xgb, train_x_df, train_y_df, cv=kfold)
 print("Accuracy: %.2f%% (%.2f%%)" % (results.mean()*100, results.std()*100))
 
+#results_os = model_xgb.score(x_os_df, y_os_df)
+#print("Accuracy: %.2f%%" % (results_os.mean()*100))
 
-#lightgbm
+xgb_pred_df = model_xgb.predict_proba(train_x_df)
+xgb_pred_df = pd.DataFrame(xgb_pred_df)
 
+#lightgbm, using to dart to change type of boosting, similar issue as tf and log regression all close to or 1, i hate light gbm anyways
+
+'''
+params = {"objective": "binary",
+          "boosting_type": "dart",
+          "learning_rate": 0.1,
+          "num_leaves": 31,
+          "max_bin": 256,
+          "feature_fraction": 0.8,
+          "verbosity": 0,
+          "min_data_in_leaf": 10,
+          "min_child_samples": 10,
+          "subsample": 0.8
+          }
+X_train, X_val, y_train, y_val = train_test_split(train_x_df, train_y_df, test_size=0.1, random_state=0)
+dtrain = lgb.Dataset(X_train, y_train)
+dvalid = lgb.Dataset(X_val, y_val, reference=dtrain)
+bst = lgb.train(params, dtrain, 1000, valid_sets=dvalid, verbose_eval=50)
+
+test_pred = bst.predict(
+    train_x_df, num_iteration=bst.best_iteration)
+
+print(test_pred)
+'''
 
 #catboost
+
+
+
+#pca - rf
+
+
+
+#ica - rf
+
+
+
+
+
+#combine predictions together with submission format
+
+
+
+#control
 

@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="943f2ca9-ce7f-484d-b515-ac6192c16c28" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/create_training_data.py" afterPath="$PROJECT_DIR$/create_training_data.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/submissions/log_probabilities.csv" afterPath="$PROJECT_DIR$/submissions/log_probabilities.csv" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tf_14_18.py" afterPath="$PROJECT_DIR$/tf_14_18.py" />
     </list>
@@ -18,8 +19,8 @@
       <file leaf-file-name="tf_14_18.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/tf_14_18.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1156">
-              <caret line="68" column="31" lean-forward="true" selection-start-line="68" selection-start-column="31" selection-end-line="68" selection-end-column="31" />
+            <state relative-caret-position="1700">
+              <caret line="171" column="0" lean-forward="true" selection-start-line="171" selection-start-column="0" selection-end-line="171" selection-end-column="0" />
               <folding>
                 <element signature="e#125#160#0" expanded="true" />
               </folding>
@@ -27,22 +28,14 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="kaggle_train_live.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/../ncaa_2017/2017/LIVE/kaggle_train_live.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1706">
-              <caret line="9" column="0" lean-forward="false" selection-start-line="9" selection-start-column="0" selection-end-line="9" selection-end-column="51" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="create_training_data.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/create_training_data.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1156">
-              <caret line="70" column="34" lean-forward="true" selection-start-line="70" selection-start-column="34" selection-end-line="70" selection-end-column="34" />
-              <folding />
+            <state relative-caret-position="1626">
+              <caret line="118" column="28" lean-forward="true" selection-start-line="118" selection-start-column="28" selection-end-line="118" selection-end-column="28" />
+              <folding>
+                <element signature="e#119#138#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -372,7 +365,7 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="2" />
+      <option name="time" value="3" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -399,7 +392,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2057">
           <caret line="123" column="42" lean-forward="false" selection-start-line="123" selection-start-column="42" selection-end-line="123" selection-end-column="42" />
-          <folding />
+          <folding>
+            <element signature="e#119#138#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -444,16 +439,18 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/create_training_data.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1156">
-          <caret line="70" column="34" lean-forward="true" selection-start-line="70" selection-start-column="34" selection-end-line="70" selection-end-column="34" />
-          <folding />
+        <state relative-caret-position="1626">
+          <caret line="118" column="28" lean-forward="true" selection-start-line="118" selection-start-column="28" selection-end-line="118" selection-end-column="28" />
+          <folding>
+            <element signature="e#119#138#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/tf_14_18.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1156">
-          <caret line="68" column="31" lean-forward="true" selection-start-line="68" selection-start-column="31" selection-end-line="68" selection-end-column="31" />
+        <state relative-caret-position="1700">
+          <caret line="171" column="0" lean-forward="true" selection-start-line="171" selection-start-column="0" selection-end-line="171" selection-end-column="0" />
           <folding>
             <element signature="e#125#160#0" expanded="true" />
           </folding>

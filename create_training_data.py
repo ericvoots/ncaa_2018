@@ -4,6 +4,7 @@
 import pandas as pd
 import numpy as np
 import gc
+from sklearn.utils import shuffle
 
 #
 
@@ -76,7 +77,7 @@ details5_df = details5_df.rename(columns={'Rank': 'LConf_Rank', 'fullconference'
 del details4_df, conf_rank_df
 gc.collect()
 
-#save intermediate step before creating set for input and output
+#save intermediate step before creating set for input and output, used for 2018 matching of team data for predictions
 #details5_df.to_csv('input\\details_conf_hist.csv')
 
 details5_df = details5_df.drop(['WLoc'],axis=1)
@@ -125,8 +126,8 @@ total_df['conf_diff'] = total_df['Conf_Rank'] - total_df['Opp_Conf_Rank']
 total_df['asst_to'] = total_df['Ast'] / total_df['TO']
 total_df['opp_asst_to'] = total_df['Opp_Ast'] / total_df['Opp_TO']
 
-
-#save data
+total_df = shuffle(total_df)
+#save data to create a model
 total_df.to_csv('input\\training_data.csv')
 
 
