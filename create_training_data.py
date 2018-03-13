@@ -18,6 +18,14 @@ seed_hist_df = pd.read_csv('input\\seed_historical.csv')
 
 conf_rank_df = pd.read_csv('input\\conference_rank.csv', delimiter=';')
 
+reg_2018_df = pd.read_csv('input\\datafiles\\RegularSeasonDetailedResults.csv')
+matchup_2018_df = pd.read_csv('submissions\\SampleSubmissionStage2_SampleTourney2018.csv')
+#regular season 2018
+reg_2018_df = reg_2018_df.loc[reg_2018_df['Season'] == 2018]
+matchup_2018_df['Season'] = matchup_2018_df['ID'].str.split('_').str[0]
+matchup_2018_df['TeamID1'] = matchup_2018_df['ID'].str.split('_').str[1]
+matchup_2018_df['TeamID2'] = matchup_2018_df['ID'].str.split('_').str[2]
+print(matchup_2018_df)
 #need to join all data to details
 
 #get winning team seed information
@@ -128,6 +136,6 @@ total_df['opp_asst_to'] = total_df['Opp_Ast'] / total_df['Opp_TO']
 
 total_df = shuffle(total_df)
 #save data to create a model
-total_df.to_csv('input\\training_data.csv')
+total_df.to_csv('input\\training_data.csv', index=False)
 
 

@@ -1,5 +1,3 @@
-#this program will be for using tensorflow for the 2014-2017  seasons in part 1 of the competition
-#also test log regression
 from sklearn import model_selection
 
 #import tensorflow
@@ -18,23 +16,24 @@ from sklearn.model_selection import StratifiedKFold, GridSearchCV
 from sklearn.model_selection import cross_val_score
 from sklearn.preprocessing import MinMaxScaler
 import xgboost
-
+from catboost import CatBoostClassifier
 
 train_all_df = pd.read_csv('input\\training_data.csv')
 
-os_df = train_all_df.loc[train_all_df['Season'] > 2016]
-train_all_df = train_all_df.loc[train_all_df['Season'] < 2017]
+test_df = train_all_df.loc[train_all_df['Season'] > 2017]
+train_all_df = train_all_df.loc[train_all_df['Season'] <= 2017]
 
 train_y_df = train_all_df['Result']
-y_os_df = os_df['Result']
+y_test_df = test_df['Result']
 
 train_x_df = train_all_df.drop(['Unnamed: 0', 'full_conf', 'TeamID', 'Opp_ID', 'Opp_full_conf', 'Season', 'Score',\
                                 'Result', 'Opp_Score', 'Opp_Conf', 'DayNum', 'Conf', 'NumOT'], axis=1)
 
-x_os_df = os_df.drop(['Unnamed: 0', 'full_conf', 'TeamID', 'Opp_ID', 'Opp_full_conf', 'Season', 'Score',\
+x_test_df = test_df.drop(['Unnamed: 0', 'full_conf', 'TeamID', 'Opp_ID', 'Opp_full_conf', 'Season', 'Score',\
                                 'Result', 'Opp_Score', 'Opp_Conf', 'DayNum', 'Conf', 'NumOT'], axis=1)
 
-del train_all_df, os_df
+print(x_test_df)
+del train_all_df, test_df
 gc.collect()
 
 clf_log = LogisticRegressionCV(fit_intercept=False)
@@ -61,7 +60,7 @@ features_log_df = pd.merge(column_list, coef, left_index=True, right_index=True)
 
 del column_list, coef
 gc.collect()
-print(features_log_df)
+#print(features_log_df)
 
 #cross validation of log regression
 
@@ -76,10 +75,8 @@ print("Accuracy: %.3f%% (%.3f%%)" % (results.mean()*100.0, results.std()*100.0))
 
 #out of sample log - but log over fitting on probabilities
 
-print('out of sample r^2 score', clf_log.score(x_os_df, y_os_df))
 
-
-log_prob_df = clf_log.predict_proba(x_os_df)[:, 1]
+log_prob_df = clf_log.predict_proba(x_test_df)[:, 1]
 log_prob_df = pd.DataFrame(log_prob_df, columns=['probability'])
 log_prob_df.to_csv('submissions\\log_probabilities.csv')
 
@@ -120,7 +117,7 @@ tf_pred_df.to_csv('submissions\\tf_pred_train.csv')
 
 model_xgb = XGBClassifier( learning_rate =0.1, n_estimators=140, max_depth=5,
  min_child_weight=50, gamma=0, subsample=0.8, colsample_bytree=0.8,
- objective= 'binary:logistic', nthread=4, scale_pos_weight=1, seed=27)
+ objective= 'binary:logistic', nthread=4, scale_ptest_weight=1, seed=27)
 
 model_xgb.fit(train_x_df, train_y_df)
 
@@ -128,7 +125,7 @@ kfold = StratifiedKFold(n_splits=10, random_state=7)
 results = cross_val_score(model_xgb, train_x_df, train_y_df, cv=kfold)
 print("Accuracy: %.2f%% (%.2f%%)" % (results.mean()*100, results.std()*100))
 
-#results_os = model_xgb.score(x_os_df, y_os_df)
+#results_os = model_xgb.score(x_test_df, y_test_df)
 #print("Accuracy: %.2f%%" % (results_os.mean()*100))
 
 xgb_pred_df = model_xgb.predict_proba(train_x_df)
@@ -160,8 +157,9 @@ print(test_pred)
 '''
 
 #catboost
-
-
+X_train, X_validation, y_train, y_validation = train_test_split(train_x_df, train_y_df, train_size=0.7, random_state=1234)
+clf_cat = CatBoostClassifier(iterations=10, depth=5, learning_rate=0.1, loss_function='Logloss')
+clf_cat.fit(X_train, y_train, eval_set=(X_validation, y_validation), plot=True)
 
 #knn
 
