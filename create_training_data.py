@@ -21,13 +21,34 @@ conf_rank_df = pd.read_csv('input\\conference_rank.csv', delimiter=';')
 reg_2018_df = pd.read_csv('input\\datafiles\\RegularSeasonDetailedResults.csv')
 matchup_2018_df = pd.read_csv('submissions\\SampleSubmissionStage2_SampleTourney2018.csv')
 #regular season 2018
-reg_2018_df = reg_2018_df.loc[reg_2018_df['Season'] == 2018]
 matchup_2018_df['Season'] = matchup_2018_df['ID'].str.split('_').str[0]
 matchup_2018_df['TeamID1'] = matchup_2018_df['ID'].str.split('_').str[1]
 matchup_2018_df['TeamID2'] = matchup_2018_df['ID'].str.split('_').str[2]
-print(matchup_2018_df)
+
+#WScore	LTeamID	LScore	WLoc	NumOT	WFGM	WFGA	WFGM3	WFGA3	WFTM	WFTA	WOR	WDR	WAst	WTO	WStl	WBlk	WPF	LFGM	LFGA	LFGM3	LFGA3	LFTM	LFTA	LOR	LDR	LAst	LTO	LStl	LBlk	LPF
+reg_2018_df = reg_2018_df.drop(['LTeamID', 'DayNum'], axis=1)
+eos_df_med = reg_2018_df.groupby(['WTeamID', 'Season']).median().add_suffix('_med').reset_index()
+eos_df_std = reg_2018_df.groupby(['WTeamID', 'Season']).std().add_suffix('_std').reset_index()
+eos_df = pd.merge(left=eos_df_med, right=eos_df_std, how='inner', on=('WTeamID', 'Season'))
+eos_df = eos_df.rename(columns={'WTeamID': 'TeamID'})
+del reg_2018_df
+gc.collect()
+
+print('\neos df\n', eos_df.head(5))
+
+details_df = details_df[['Season', 'WTeamID', 'LTeamID']]
+
+#eos_df['WTeamID'].replace(r'\s+', np.nan, regex=True)
+
+#create season averages
+
+
+
 #need to join all data to details
 
+
+
+'''
 #get winning team seed information
 details2_df = pd.merge(details_df, t_seeds_df, how='left', left_on=['WTeamID', 'Season'], right_on=['TeamID', 'Season'])
 details2_df = details2_df.drop('TeamID', axis=1)
@@ -137,5 +158,5 @@ total_df['opp_asst_to'] = total_df['Opp_Ast'] / total_df['Opp_TO']
 total_df = shuffle(total_df)
 #save data to create a model
 total_df.to_csv('input\\training_data.csv', index=False)
-
+'''
 
