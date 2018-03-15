@@ -19,11 +19,7 @@ seed_hist_df = pd.read_csv('input\\seed_historical.csv')
 conf_rank_df = pd.read_csv('input\\conference_rank.csv', delimiter=';')
 
 reg_2018_df = pd.read_csv('input\\datafiles\\RegularSeasonDetailedResults.csv')
-matchup_2018_df = pd.read_csv('submissions\\SampleSubmissionStage2_SampleTourney2018.csv')
-#regular season 2018
-matchup_2018_df['Season'] = matchup_2018_df['ID'].str.split('_').str[0]
-matchup_2018_df['TeamID1'] = matchup_2018_df['ID'].str.split('_').str[1]
-matchup_2018_df['TeamID2'] = matchup_2018_df['ID'].str.split('_').str[2]
+
 
 #WScore	LTeamID	LScore	WLoc	NumOT	WFGM	WFGA	WFGM3	WFGA3	WFTM	WFTA	WOR	WDR	WAst	WTO	WStl	WBlk	WPF	LFGM	LFGA	LFGM3	LFGA3	LFTM	LFTA	LOR	LDR	LAst	LTO	LStl	LBlk	LPF
 reg_2018_df = reg_2018_df.drop(['LTeamID', 'DayNum'], axis=1)
@@ -134,32 +130,24 @@ eos_df_med = eos_df_med.rename(columns={'WTeamID': 'TeamID', 'WScore_med': 'Scor
                                         'WBlk_med': 'Blk_med', 'WPF_med': 'PF_med'})
 
 eos_df_med = eos_df_med.drop(['NumOT_med'], axis=1)
-
+print('eos df columns\n', eos_df_med.columns)
+#issues with matchup 2018 data, running out of time sending to csv to use
+eos_2018 = pd.DataFrame()
+eos_2018 = eos_df_med.loc[(eos_df_med['Season'] == 2018)]
+eos_2018.to_csv("input\\eos_2018.csv", index=False)
 
 eos_df_med_copy = eos_df_med.copy()
-eos_df_med_copy2 = eos_df_med.copy()
-eos_df_med_copy3 = eos_df_med.copy()
 
 final_df_win = pd.merge(left=df_win, right=eos_df_med, how='left', left_on=('Season', 'TeamID'), right_on=('Season', 'TeamID'))
 final_df_win = pd.merge(left=final_df_win, right=eos_df_med_copy, how='left', left_on=('Season', 'TeamID_Opp'), right_on=('Season', 'TeamID'), suffixes=('', '_Opp'))
 final_df_win = final_df_win.loc[:, ~final_df_win.columns.duplicated()]
 final_df_win.reset_index()
-'''
-final_df_loss = pd.merge(left=df_loss, right=eos_df_med_copy2, how='left', left_on=('Season', 'TeamID'), right_on=('Season', 'TeamID'))
-final_df_loss = pd.merge(left=final_df_loss, right=eos_df_med_copy3, how='left', left_on=('Season', 'TeamID_Opp'), right_on=('Season', 'TeamID'), suffixes=('', '_Opp'))
 
-print(final_df_loss.head(5))
-frames = [final_df_loss, final_df_win]
+del eos_df_med, eos_df_med_copy
+gc.collect()
 
-final_df = pd.concat(frames)
-final_df = final_df.drop(['TeamID.1'], axis=1)
-
-final_df = final_df.rename(columns={'Wfull_conf': 'full_conf', 'WConf_Rank': 'Conf_Rank' })
-#save data to create a model
-final_df.to_csv('input\\training_data.csv', index=False)
-'''
 #create test set
-final_df_win.to_csv('input\\training_data.csv', index=False)
+
 
 final_df_loss = pd.DataFrame()
 final_df_loss[['TeamID', 'TeamID_Opp', 'Season']] = final_df_win[['TeamID_Opp', 'TeamID', 'Season']]
@@ -172,8 +160,8 @@ final_df_loss[['Seed', 'Conf', 'seed_hist_pct', 'full_conf', 'Conf_Rank', 'Score
             'Score_med_Opp', 'DScore_med_Opp', 'FGM_med_Opp', 'FGA_med_Opp', 'FMG3_med_Opp', 'FGA3_med_Opp',\
             'FTM_med_Opp', 'FTA_med_Opp', 'OR_med_Opp', 'DR_med_Opp', 'Ast_med_Opp', 'TO_med_Opp','Stl_med_Opp',\
             'Blk_med_Opp', 'PF_med_Opp', 'DFGM_med_Opp', 'DFGA_med_Opp', 'DFGM3_Opp', 'DFGA3_med_Opp', 'DFTM_med_Opp',\
-            'DFTA_med_Opp'\
-            ]] = final_df_win[[\
+            'DFTA_med_Opp', 'DOR_med_Opp', 'DDR_med_Opp', 'DAst_med_Opp', 'DTO_med_Opp', 'DStl_med_Opp',\
+            'DBlk_med_Opp', 'DPF_med_Opp']] = final_df_win[[\
             'Seed_Opp', 'Conf_Opp', 'seed_hist_pct_Opp', 'full_conf_Opp', 'Conf_Rank_Opp',\
             'Score_med_Opp', 'DScore_med_Opp', 'FGM_med_Opp', 'FGA_med_Opp', 'FMG3_med_Opp', 'FGA3_med_Opp',\
             'FTM_med_Opp', 'FTA_med_Opp', 'OR_med_Opp', 'DR_med_Opp', 'Ast_med_Opp', 'TO_med_Opp', 'Stl_med_Opp',\
@@ -182,6 +170,37 @@ final_df_loss[['Seed', 'Conf', 'seed_hist_pct', 'full_conf', 'Conf_Rank', 'Score
             'DBlk_med_Opp', 'DPF_med_Opp',\
             'Seed', 'Conf', 'seed_hist_pct', 'full_conf', 'Conf_Rank', 'Score_med', 'DScore_med', 'FGM_med',\
             'FGA_med', 'FMG3_med', 'FGA3_med', 'FTM_med', 'FTA_med', 'OR_med', 'DR_med', 'Ast_med', 'TO_med', \
-            'Stl_med', 'Blk_med', 'PF_med', 'DFGM_med', 'DFGA_med', 'DFGM3', 'DFGA3_med', 'DFTM_med', 'DFTA_med']]
-print(final_df_loss.head(5))
-print(final_df_win[['TeamID', 'TeamID_Opp', 'Season']].head(5))
+            'Stl_med', 'Blk_med', 'PF_med', 'DFGM_med', 'DFGA_med', 'DFGM3', 'DFGA3_med', 'DFTM_med', 'DFTA_med', \
+            'DOR_med', 'DDR_med', 'DAst_med', 'DTO_med', 'DStl_med', 'DBlk_med', 'DPF_med']]
+
+final_df_loss['Result'] = 0
+frames = [final_df_win, final_df_loss]
+final_df = pd.concat(frames)
+
+final_df['seed_diff'] = final_df['Seed'] - final_df['Seed_Opp']
+final_df['conf_diff'] = final_df['Conf_Rank'] - final_df['Conf_Rank_Opp']
+
+final_df.to_csv('input\\training_data.csv', index=False)
+
+final_df_loss.to_csv('input\\training_losses_temp.csv', index=False)
+final_df_loss.to_csv('input\\training_wins_temp.csv', index=False)
+
+#test set creation
+t_seeds_df = pd.read_csv('input\\datafiles\\NCAATourneySeeds.csv')
+
+teams_conf_df = pd.read_csv('input\\datafiles\\TeamConferences.csv')
+
+seed_hist_df = pd.read_csv('input\\seed_historical.csv')
+
+conf_rank_df = pd.read_csv('input\\conference_rank.csv', delimiter=';')
+
+reg_2018_df = pd.read_csv('input\\datafiles\\RegularSeasonDetailedResults.csv')
+
+matchup_2018_df = pd.read_csv('submissions\\substage2.csv', delimiter=';')
+print(matchup_2018_df)
+#regular season 2018
+matchup_2018_df['Season'] = matchup_2018_df['ID'].str.split('_').str[0]
+matchup_2018_df['TeamID'] = matchup_2018_df['ID'].str.split('_').str[1]
+matchup_2018_df['TeamID_Opp'] = matchup_2018_df['ID'].str.split('_').str[2]
+
+matchup_2018_df.to_csv('input\\matchup_2018.csv')
