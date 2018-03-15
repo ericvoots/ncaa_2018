@@ -164,28 +164,24 @@ final_df_win.to_csv('input\\training_data.csv', index=False)
 final_df_loss = pd.DataFrame()
 final_df_loss[['TeamID', 'TeamID_Opp', 'Season']] = final_df_win[['TeamID_Opp', 'TeamID', 'Season']]
 
-final_df_loss[['Seed', 'Seed_Opp', 'Conf', 'seed_hist_pct', 'full_conf', 'Conf_Rank', 'Score_med', 'DScore_med', 'FGM_med',\
+final_df_loss[['Seed', 'Conf', 'seed_hist_pct', 'full_conf', 'Conf_Rank', 'Score_med', 'DScore_med', 'FGM_med',\
             'FGA_med', 'FMG3_med', 'FGA3_med', 'FTM_med', 'FTA_med', 'OR_med', 'DR_med', 'Ast_med', 'TO_med',\
             'Stl_med', 'Blk_med', 'PF_med', 'DFGM_med', 'DFGA_med', 'DFGM3', 'DFGA3_med', 'DFTM_med', 'DFTA_med',\
-            'DOR_med', 'DDR_med', 'DAst_med', 'DTO_med', 'DStl_med', 'DBlk_med', 'DPF_med',
-            'Conf_Opp', 'seed_hist_pct_Opp', 'full_conf_Opp', 'Conf_Rank_Opp', \
-            'Score_med_Opp', 'DScore_med_Opp', 'FGM_med_Opp', 'FGA_med_Opp', 'FMG3_med_Opp', 'FGA3_med_Opp', \
-            'FTM_med_Opp', 'FTA_med_Opp', 'OR_med_Opp', 'DR_med_Opp', 'Ast_med_Opp', 'TO_med_Opp', 'Stl_med_Opp', \
-            'Blk_med_Opp', 'PF_med_Opp', 'DFGM_med_Opp', 'DFGA_med_Opp', 'DFGM3_Opp', 'DFGA3_med_Opp',
-            'DFTM_med_Opp', 'DFTA_med_Opp', 'DOR_med_Opp', 'DDR_med_Opp', 'DAst_med_Opp', 'DTO_med_Opp', 'DStl_med_Opp',\
-            'DBlk_med_Opp', 'DPF_med_Opp']] = final_df_win[[\
-            'Seed_Opp', 'Seed',  'Conf_Opp', 'seed_hist_pct_Opp', 'full_conf_Opp', 'Conf_Rank_Opp',\
+            'DOR_med', 'DDR_med', 'DAst_med', 'DTO_med', 'DStl_med', 'DBlk_med', 'DPF_med',\
+            'Seed_Opp', 'Conf_Opp', 'seed_hist_pct_Opp', 'full_conf_Opp', 'Conf_Rank_Opp',\
+            'Score_med_Opp', 'DScore_med_Opp', 'FGM_med_Opp', 'FGA_med_Opp', 'FMG3_med_Opp', 'FGA3_med_Opp',\
+            'FTM_med_Opp', 'FTA_med_Opp', 'OR_med_Opp', 'DR_med_Opp', 'Ast_med_Opp', 'TO_med_Opp','Stl_med_Opp',\
+            'Blk_med_Opp', 'PF_med_Opp', 'DFGM_med_Opp', 'DFGA_med_Opp', 'DFGM3_Opp', 'DFGA3_med_Opp', 'DFTM_med_Opp',\
+            'DFTA_med_Opp'\
+            ]] = final_df_win[[\
+            'Seed_Opp', 'Conf_Opp', 'seed_hist_pct_Opp', 'full_conf_Opp', 'Conf_Rank_Opp',\
             'Score_med_Opp', 'DScore_med_Opp', 'FGM_med_Opp', 'FGA_med_Opp', 'FMG3_med_Opp', 'FGA3_med_Opp',\
             'FTM_med_Opp', 'FTA_med_Opp', 'OR_med_Opp', 'DR_med_Opp', 'Ast_med_Opp', 'TO_med_Opp', 'Stl_med_Opp',\
             'Blk_med_Opp', 'PF_med_Opp', 'DFGM_med_Opp', 'DFGA_med_Opp', 'DFGM3_Opp', 'DFGA3_med_Opp', 'DFTM_med_Opp',\
             'DFTA_med_Opp', 'DOR_med_Opp', 'DDR_med_Opp', 'DAst_med_Opp', 'DTO_med_Opp', 'DStl_med_Opp',\
             'DBlk_med_Opp', 'DPF_med_Opp',\
-            'Seed', 'Seed_Opp', 'Conf', 'seed_hist_pct', 'full_conf', 'Conf_Rank', 'Score_med', 'DScore_med', 'FGM_med' \
+            'Seed', 'Conf', 'seed_hist_pct', 'full_conf', 'Conf_Rank', 'Score_med', 'DScore_med', 'FGM_med',\
             'FGA_med', 'FMG3_med', 'FGA3_med', 'FTM_med', 'FTA_med', 'OR_med', 'DR_med', 'Ast_med', 'TO_med', \
-            'Stl_med', 'Blk_med', 'PF_med', 'DFGM_med', 'DFGA_med', 'DFGM3', 'DFGA3_med', 'DFTM_med', 'DFTA_med', \
-            'DOR_med', 'DDR_med', 'DAst_med', 'DTO_med', 'DStl_med', 'DBlk_med', 'DPF_med']]
-
-
-
+            'Stl_med', 'Blk_med', 'PF_med', 'DFGM_med', 'DFGA_med', 'DFGM3', 'DFGA3_med', 'DFTM_med', 'DFTA_med']]
 print(final_df_loss.head(5))
 print(final_df_win[['TeamID', 'TeamID_Opp', 'Season']].head(5))
