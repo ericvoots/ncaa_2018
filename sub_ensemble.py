@@ -18,25 +18,26 @@ from sklearn.preprocessing import MinMaxScaler
 import xgboost
 from catboost import CatBoostClassifier
 
+from sklearn.utils import shuffle
+
 train_all_df = pd.read_csv('input\\training_data.csv')
 
-test_df = train_all_df.loc[train_all_df['Season'] > 2017]
+#test_df = train_all_df.loc[train_all_df['Season'] > 2017]
 train_all_df = train_all_df.loc[train_all_df['Season'] <= 2017]
 
 train_y_df = train_all_df['Result']
-y_test_df = test_df['Result']
+#y_test_df = test_df['Result']
+print(train_y_df.head(5))
+train_x_df = train_all_df.drop(['full_conf', 'Conf', 'TeamID', 'TeamID_Opp', 'Season', 'Result', 'full_conf_Opp',\
+                                'Conf_Opp', 'seed_hist_pct', 'seed_hist_pct_Opp'], axis=1)
+train_x_df = train_x_df[['Seed', 'Seed_Opp', 'seed_diff', 'Conf_Rank', 'Conf_Rank_Opp', 'conf_diff']]
+#x_test_df = test_df.drop(['full_conf', 'Conf', 'TeamID', 'TeamID_Opp', 'Season', 'Result', 'full_conf_Opp', 'Conf_Opp'], axis=1)
 
-train_x_df = train_all_df.drop(['Unnamed: 0', 'full_conf', 'TeamID', 'Opp_ID', 'Opp_full_conf', 'Season', 'Score',\
-                                'Result', 'Opp_Score', 'Opp_Conf', 'DayNum', 'Conf', 'NumOT'], axis=1)
-
-x_test_df = test_df.drop(['Unnamed: 0', 'full_conf', 'TeamID', 'Opp_ID', 'Opp_full_conf', 'Season', 'Score',\
-                                'Result', 'Opp_Score', 'Opp_Conf', 'DayNum', 'Conf', 'NumOT'], axis=1)
-
-print(x_test_df)
-del train_all_df, test_df
+print('training columns, post drop\n', train_x_df.columns)
+del train_all_df
 gc.collect()
 
-clf_log = LogisticRegressionCV(fit_intercept=False)
+clf_log = LogisticRegressionCV(fit_intercept=False, solver='newton-cg')
 
 
 clf_log.fit(train_x_df, train_y_df)
@@ -47,7 +48,7 @@ log_pred = clf_log.predict(train_x_df)
 
 log_pred = pd.DataFrame(log_pred)
 
-log_pred.to_csv('input\\log_preds.csv')
+log_pred.to_csv('input\\log_preds_train.csv')
 
 column_list = train_x_df.columns
 
@@ -57,7 +58,7 @@ coef = clf_log.coef_
 coef = pd.DataFrame(coef.reshape(-1, len(coef)), columns=['Coefficients'])
 
 features_log_df = pd.merge(column_list, coef, left_index=True, right_index=True)
-
+print('coefficients log\n', features_log_df)
 del column_list, coef
 gc.collect()
 #print(features_log_df)
@@ -69,37 +70,37 @@ test_size = .80
 num_instances = len(train_x_df)
 seed = 4
 kfold = model_selection.ShuffleSplit(n_splits=5, test_size=test_size, random_state=seed)
-model = LogisticRegressionCV()
-results = model_selection.cross_val_score(model, train_x_df, train_y_df, cv=kfold)
+
+results = model_selection.cross_val_score(clf_log, train_x_df, train_y_df, cv=kfold)
 print("Accuracy: %.3f%% (%.3f%%)" % (results.mean()*100.0, results.std()*100.0))
 
 #out of sample log - but log over fitting on probabilities
 
 
-log_prob_df = clf_log.predict_proba(x_test_df)[:, 1]
-log_prob_df = pd.DataFrame(log_prob_df, columns=['probability'])
-log_prob_df.to_csv('submissions\\log_probabilities.csv')
+#log_prob_df = clf_log.predict_proba(x_test_df)[:, 1]
+#log_prob_df = pd.DataFrame(log_prob_df, columns=['probability'])
+#log_prob_df.to_csv('submissions\\log_probabilities.csv')
 
-rclf = RandomForestClassifier(n_estimators=25, min_samples_split=60, min_samples_leaf=30)
+rclf = RandomForestClassifier(n_estimators=25, min_samples_split=60, min_samples_leaf=30, max_depth=5)
 rclf_fit = rclf.fit(train_x_df, train_y_df)
 rclf_score = rclf.score(train_x_df, train_y_df)
 rclf_predict_df = rclf.predict_proba(train_x_df)[:,1]
 rclf_predict_df = pd.DataFrame(rclf_predict_df, columns=['rf_proba'])
+rclf_pred = rclf.predict(train_x_df)
+rclf_pred = pd.DataFrame(rclf_pred)
+rclf_pred.to_csv('input\\rclf_preds_train.csv')
 
-print(rclf_predict_df)
-print(rclf_score)
 
 #tensorflow - shows signs of overfitting - try norm - still 0 or 1 similar to log
 '''
 scaler = MinMaxScaler()
 train_x_df_norm = scaler.fit_transform(train_x_df)
 
-
 model = Sequential()
-model.add(Dense(120, input_dim=train_x_df_norm.shape[1], activation='relu'))
-model.add(Dense(80, activation='relu'))
-model.add(Dense(40, activation='hard_sigmoid'))
-model.add(Dense(8, activation='sigmoid'))
+model.add(Dense(512, input_dim=train_x_df_norm.shape[1], activation='relu'))
+model.add(Dense(256, activation='relu'))
+model.add(Dense(128, activation='hard_sigmoid'))
+model.add(Dense(64, activation='sigmoid'))
 model.add(Dense(1, activation='sigmoid'))
 # Compile model
 model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
@@ -117,7 +118,7 @@ tf_pred_df.to_csv('submissions\\tf_pred_train.csv')
 
 model_xgb = XGBClassifier( learning_rate =0.1, n_estimators=140, max_depth=5,
  min_child_weight=50, gamma=0, subsample=0.8, colsample_bytree=0.8,
- objective= 'binary:logistic', nthread=4, scale_ptest_weight=1, seed=27)
+ objective= 'binary:logistic', nthread=4, seed=27)
 
 model_xgb.fit(train_x_df, train_y_df)
 
@@ -133,7 +134,7 @@ xgb_pred_df = pd.DataFrame(xgb_pred_df)
 
 #lightgbm, using to dart to change type of boosting, similar issue as tf and log regression all close to or 1, i hate light gbm anyways
 
-'''
+
 params = {"objective": "binary",
           "boosting_type": "dart",
           "learning_rate": 0.1,
@@ -154,8 +155,8 @@ test_pred = bst.predict(
     train_x_df, num_iteration=bst.best_iteration)
 
 print(test_pred)
-'''
 
+'''
 #catboost
 X_train, X_validation, y_train, y_validation = train_test_split(train_x_df, train_y_df, train_size=0.7, random_state=1234)
 clf_cat = CatBoostClassifier(iterations=10, depth=5, learning_rate=0.1, loss_function='Logloss')
@@ -181,3 +182,4 @@ clf_cat.fit(X_train, y_train, eval_set=(X_validation, y_validation), plot=True)
 
 #control
 
+'''
